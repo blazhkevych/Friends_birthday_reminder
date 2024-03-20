@@ -24,18 +24,28 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 
+/**
+ * MainActivity is the main screen of the application.
+ * It displays a list of friends and provides options to add, edit, or delete a friend.
+ */
 public class MainActivity extends AppCompatActivity {
 
-    private ArrayList<Friend> friendsList;
-    private ArrayAdapter<Friend> friendsAdapter;
-    private ListView friendsListView;
+    private ArrayList<Friend> friendsList; // List of friends
+    private ArrayAdapter<Friend> friendsAdapter; // Adapter for the list of friends
+    private ListView friendsListView; // ListView to display the list of friends
 
-    private EditText inputName;
-    private Button selectBirthdayButton;
+    private EditText inputName; // Input field for the name of a friend
+    private Button selectBirthdayButton; // Button to select the birthday of a friend
 
-    private Calendar calendar;
-    private SimpleDateFormat dateFormat;
+    private Calendar calendar; // Calendar to store the selected birthday
+    private SimpleDateFormat dateFormat; // Format for displaying the birthday
 
+    /**
+     * Called when the activity is starting.
+     * This is where most initialization should go.
+     *
+     * @param savedInstanceState If the activity is being re-initialized after previously being shut down then this Bundle contains the data it most recently supplied in onSaveInstanceState(Bundle).
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,17 +57,19 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        // Initialize the list of friends and the adapter
         friendsList = new ArrayList<>(
                 new ArrayList<Friend>() {{
-                    add(new Friend("Иван", "01.01.2000"));
-                    add(new Friend("Петр", "02.02.2000"));
-                    add(new Friend("Сидор", "03.03.2000"));
+                    add(new Friend("Ivan", "01.01.2000"));
+                    add(new Friend("Petr", "02.02.2000"));
+                    add(new Friend("Sergey", "03.03.2000"));
                 }}
         );
         friendsAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, friendsList);
         friendsListView = findViewById(R.id.friendsListView);
         friendsListView.setAdapter(friendsAdapter);
 
+        // Set up the "Add Friend" button
         Button addFriendButton = findViewById(R.id.addFriendButton);
         addFriendButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -66,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Обработка нажатия на элемент списка
+        // Set up the item click listener for the list of friends
         friendsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -74,42 +86,43 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // Initialize the calendar and the date format
         calendar = Calendar.getInstance();
         dateFormat = new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault());
     }
 
-    // Метод для отображения диалога добавления друга
+    /**
+     * Shows a dialog to add a new friend.
+     */
     private void showAddFriendDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Добавить друга");
+        builder.setTitle("Add a friend");
 
-        // Поле ввода имени друга
+        // Friend's name input field
         inputName = new EditText(this);
-        inputName.setHint("Имя друга");
-        //builder.setView(inputName);
+        inputName.setHint("Friend's name");
 
-        // Кнопка "Выбрать дату рождения"
+        // Button "Select date of birth"
         selectBirthdayButton = new Button(this);
-        selectBirthdayButton.setText("Выбрать дату рождения");
+        selectBirthdayButton.setText("Select date of birth");
         selectBirthdayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showDatePickerDialog();
             }
         });
-        //builder.setView(selectBirthdayButton);
 
-        // Создание LinearLayout и добавление в него inputName и selectBirthdayButton
+        // Create a LinearLayout and add inputName and selectBirthdayButton to it
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.addView(inputName);
         layout.addView(selectBirthdayButton);
 
-        // Использование LinearLayout в качестве представления
+        // Using LinearLayout as a view
         builder.setView(layout);
 
-        // Кнопка "Добавить"
-        builder.setPositiveButton("Добавить", (dialog, which) -> {
+        // "Add" button
+        builder.setPositiveButton("Add", (dialog, which) -> {
             String name = inputName.getText().toString().trim();
             if (!name.isEmpty()) {
                 if (calendar != null) {
@@ -118,25 +131,30 @@ public class MainActivity extends AppCompatActivity {
                     friendsList.add(newFriend);
                     friendsAdapter.notifyDataSetChanged();
                 } else {
-                    Toast.makeText(MainActivity.this, "Пожалуйста, выберите дату рождения", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Please select date of birth", Toast.LENGTH_SHORT).show();
                 }
             } else {
-                Toast.makeText(MainActivity.this, "Пожалуйста, введите имя", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Please enter a name", Toast.LENGTH_SHORT).show();
             }
         });
 
-        // Кнопка "Отмена"
-        builder.setNegativeButton("Отмена", (dialog, which) -> dialog.cancel());
+        // Cancel button
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
         builder.show();
     }
 
-    // Метод для отображения диалога выбора даты рождения
+    /**
+     * Shows a date picker dialog to select the birthday of a friend.
+     */
     private void showDatePickerDialog() {
         new DatePickerDialog(this, dateListener, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
     }
 
-    // Слушатель для выбора даты рождения
+    /**
+     * Listener for the date picker dialog.
+     * Updates the selected birthday when a date is set.
+     */
     private DatePickerDialog.OnDateSetListener dateListener = new DatePickerDialog.OnDateSetListener() {
         @Override
         public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
@@ -148,26 +166,84 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    // Метод для отображения диалога редактирования или удаления друга
+    /**
+     * Shows a dialog to edit or delete a friend.
+     *
+     * @param position The position of the friend in the list.
+     */
     private void showEditOrDeleteDialog(final int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Выберите действие");
+        builder.setTitle("Choose an action");
 
-        // Кнопка "Редактировать"
-        builder.setPositiveButton("Редактировать", (dialog, which) -> {
-            // Реализация редактирования опущена для краткости
-            Toast.makeText(MainActivity.this, "Редактирование друга", Toast.LENGTH_SHORT).show();
+        // "Edit" button
+        builder.setPositiveButton("Edit", (dialog, which) -> {
+            showEditFriendDialog(position);
         });
 
-        // Кнопка "Удалить"
-        builder.setNegativeButton("Удалить", (dialog, which) -> {
+        // Button "Delete"
+        builder.setNegativeButton("Delete", (dialog, which) -> {
             friendsList.remove(position);
             friendsAdapter.notifyDataSetChanged();
-            Toast.makeText(MainActivity.this, "Удаление друга", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, "Removing a friend", Toast.LENGTH_SHORT).show();
         });
 
-        // Кнопка "Отмена"
-        builder.setNeutralButton("Отмена", (dialog, which) -> dialog.cancel());
+        // Cancel button
+        builder.setNeutralButton("Cancel", (dialog, which) -> dialog.cancel());
+
+        builder.show();
+    }
+
+    /**
+     * Shows a dialog to edit a friend.
+     *
+     * @param position The position of the friend in the list.
+     */
+    private void showEditFriendDialog(final int position) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Edit friend");
+
+        // Friend's name input field
+        inputName = new EditText(this);
+        inputName.setText(friendsList.get(position).getName());
+
+        // Button "Select date of birth"
+        selectBirthdayButton = new Button(this);
+        selectBirthdayButton.setText(friendsList.get(position).getBirthday());
+        selectBirthdayButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDatePickerDialog();
+            }
+        });
+
+        // Create a LinearLayout and add inputName and selectBirthdayButton to it
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.addView(inputName);
+        layout.addView(selectBirthdayButton);
+
+        // Using LinearLayout as a view
+        builder.setView(layout);
+
+        // "Save" button
+        builder.setPositiveButton("Save", (dialog, which) -> {
+            String name = inputName.getText().toString().trim();
+            if (!name.isEmpty()) {
+                if (calendar != null) {
+                    String birthday = dateFormat.format(calendar.getTime());
+                    Friend updatedFriend = new Friend(name, birthday);
+                    friendsList.set(position, updatedFriend);
+                    friendsAdapter.notifyDataSetChanged();
+                } else {
+                    Toast.makeText(MainActivity.this, "Please select date of birth", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(MainActivity.this, "Please enter a name", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // Cancel button
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
         builder.show();
     }
